@@ -111,8 +111,8 @@
       pageToRender = 3;  // สารบัญ (หน้า 3 ใน PDF)
       pageInfoText = "สารบัญ (หน้า 1)";
     } else {
-      pageToRender = pageNum + 2;  // เพิ่ม 2 เพื่อให้หน้า 2 ในระบบตรงกับหน้า 4 ของ PDF
-      pageInfoText = `หน้า ${pageNum} (หน้า ${pageToRender} ใน PDF)`;
+      pageToRender = pageNum + 3;  // เพิ่ม 2 เพื่อให้หน้า 2 ในระบบตรงกับหน้า 4 ของ PDF
+      pageInfoText = `หน้า ${pageToRender}`;
     }
 
     document.getElementById('page-info').textContent = pageInfoText;
