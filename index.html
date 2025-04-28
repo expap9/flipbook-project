@@ -38,7 +38,7 @@
     }
 
     #page-select {
-      width: 100px;
+      width: 180px;
       padding: 5px;
       font-size: 16px;
     }
@@ -56,6 +56,13 @@
     #prev-btn:hover, #next-btn:hover {
       background-color: #2980b9;
     }
+    
+    .page-info {
+      text-align: center;
+      margin-bottom: 10px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
   </style>
 </head>
 <body>
@@ -63,6 +70,7 @@
 <h1 style="text-align: center; margin-top: 20px;">คู่มือ HAD โรงพยาบาลลำปาง ปี 2568</h1>
 
 <div id="pdf-container">
+  <div id="page-info" class="page-info">หน้าปก (หน้า 0)</div>
   <canvas id="pdf-canvas"></canvas>
 </div>
 
@@ -76,7 +84,7 @@
   const url = 'https://expap9.github.io/flipbook-project/had2568.pdf';
 
   let pdfDoc = null;
-  let currentPage = 1;  // เริ่มต้นที่หน้าปก
+  let currentPage = 0;  // 0 = หน้าปก, 1 = สารบัญ (หน้า 3 ใน PDF)
   let totalPages = 0;
   const scale = 1.5;
 
@@ -94,11 +102,20 @@
   // ฟังก์ชันในการแสดงหน้า PDF
   function renderPage(pageNum) {
     let pageToRender = pageNum;
-    if (pageNum === 1) {
-      pageToRender = 1;  // หน้า 1 จะแสดงหน้าปกจริง
+    let pageInfoText = "";
+    
+    if (pageNum === 0) {
+      pageToRender = 1;  // หน้าปกจริงใน PDF (หน้า 1)
+      pageInfoText = "หน้าปก (หน้า 0)";
+    } else if (pageNum === 1) {
+      pageToRender = 3;  // สารบัญ (หน้า 3 ใน PDF)
+      pageInfoText = "สารบัญ (หน้า 1)";
     } else {
-      pageToRender = pageNum + 3;  // เพิ่ม 3 เพื่อให้หน้า 1 ในระบบตรงกับหน้า 4 ของ PDF
+      pageToRender = pageNum + 2;  // เพิ่ม 2 เพื่อให้หน้า 2 ในระบบตรงกับหน้า 4 ของ PDF
+      pageInfoText = `หน้า ${pageNum} (หน้า ${pageToRender} ใน PDF)`;
     }
+
+    document.getElementById('page-info').textContent = pageInfoText;
 
     pdfDoc.getPage(pageToRender).then(function(page) {
       const viewport = page.getViewport({ scale: scale });
@@ -121,17 +138,31 @@
   // สร้างตัวเลือกหน้าสำหรับ select box
   function generatePageOptions() {
     const select = document.getElementById('page-select');
-    for (let i = 1; i <= totalPages - 3; i++) {  // -3 เพื่อให้หน้าเลือกเริ่มจากหน้า 1 แทนหน้า 4
+    
+    // เพิ่มหน้าปก
+    const coverOption = document.createElement('option');
+    coverOption.value = 0;
+    coverOption.textContent = "0 - หน้าปก (หน้า 1 ใน PDF)";
+    select.appendChild(coverOption);
+    
+    // เพิ่มสารบัญ
+    const tocOption = document.createElement('option');
+    tocOption.value = 1;
+    tocOption.textContent = "1 - สารบัญ (หน้า 3 ใน PDF)";
+    select.appendChild(tocOption);
+    
+    // เพิ่มหน้าอื่นๆ
+    for (let i = 2; i <= totalPages - 2; i++) {
       const option = document.createElement('option');
       option.value = i;
-      option.textContent = `หน้า ${i}`;  // หน้า 1 จะแสดงเป็น "หน้า 1" ซึ่งตรงกับหน้า 4 ของ PDF
+      option.textContent = `${i} - เนื้อหา (หน้า ${i+2} ใน PDF)`;
       select.appendChild(option);
     }
   }
 
   // การเปลี่ยนหน้าไปข้างหน้า
   document.getElementById('next-btn').addEventListener('click', function() {
-    if (currentPage < totalPages - 3) {
+    if (currentPage < totalPages - 2) {
       currentPage++;
       renderPage(currentPage);
     }
@@ -139,7 +170,7 @@
 
   // การเปลี่ยนหน้ากลับ
   document.getElementById('prev-btn').addEventListener('click', function() {
-    if (currentPage > 1) {
+    if (currentPage > 0) {
       currentPage--;
       renderPage(currentPage);
     }
@@ -148,7 +179,7 @@
   // การไปยังหน้าที่ผู้ใช้เลือก
   document.getElementById('page-select').addEventListener('change', function() {
     const pageNumber = parseInt(this.value);
-    if (pageNumber >= 1 && pageNumber <= totalPages - 3) {
+    if (pageNumber >= 0 && pageNumber <= totalPages - 2) {
       currentPage = pageNumber;
       renderPage(currentPage);
     }
@@ -156,7 +187,7 @@
 
   // ฟังก์ชันนี้จะใช้แสดงหน้าปกก่อน
   window.onload = function() {
-    renderPage(1); // เมื่อโหลดเสร็จแสดงหน้าปก
+    renderPage(0); // เมื่อโหลดเสร็จแสดงหน้าปก
   }
 </script>
 
