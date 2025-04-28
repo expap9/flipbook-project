@@ -76,7 +76,7 @@
   const url = 'https://expap9.github.io/flipbook-project/had2568.pdf';
 
   let pdfDoc = null;
-  let currentPage = 4;  // หน้าแรกเริ่มจากหน้า 4
+  let currentPage = 1;  // เริ่มต้นที่หน้าปก
   let totalPages = 0;
   const scale = 1.5;
 
@@ -93,7 +93,14 @@
 
   // ฟังก์ชันในการแสดงหน้า PDF
   function renderPage(pageNum) {
-    pdfDoc.getPage(pageNum).then(function(page) {
+    let pageToRender = pageNum;
+    if (pageNum === 1) {
+      pageToRender = 1;  // หน้า 1 จะแสดงหน้าปกจริง
+    } else {
+      pageToRender = pageNum + 3;  // เพิ่ม 3 เพื่อให้หน้า 1 ในระบบตรงกับหน้า 4 ของ PDF
+    }
+
+    pdfDoc.getPage(pageToRender).then(function(page) {
       const viewport = page.getViewport({ scale: scale });
       const canvas = document.getElementById('pdf-canvas');
       const context = canvas.getContext('2d');
@@ -114,17 +121,17 @@
   // สร้างตัวเลือกหน้าสำหรับ select box
   function generatePageOptions() {
     const select = document.getElementById('page-select');
-    for (let i = 4; i <= totalPages; i++) {
+    for (let i = 1; i <= totalPages - 3; i++) {  // -3 เพื่อให้หน้าเลือกเริ่มจากหน้า 1 แทนหน้า 4
       const option = document.createElement('option');
       option.value = i;
-      option.textContent = `หน้า ${i - 3}`;  // ปรับให้เริ่มจากหน้า 1
+      option.textContent = `หน้า ${i}`;  // หน้า 1 จะแสดงเป็น "หน้า 1" ซึ่งตรงกับหน้า 4 ของ PDF
       select.appendChild(option);
     }
   }
 
   // การเปลี่ยนหน้าไปข้างหน้า
   document.getElementById('next-btn').addEventListener('click', function() {
-    if (currentPage < totalPages) {
+    if (currentPage < totalPages - 3) {
       currentPage++;
       renderPage(currentPage);
     }
@@ -132,7 +139,7 @@
 
   // การเปลี่ยนหน้ากลับ
   document.getElementById('prev-btn').addEventListener('click', function() {
-    if (currentPage > 4) {
+    if (currentPage > 1) {
       currentPage--;
       renderPage(currentPage);
     }
@@ -141,7 +148,7 @@
   // การไปยังหน้าที่ผู้ใช้เลือก
   document.getElementById('page-select').addEventListener('change', function() {
     const pageNumber = parseInt(this.value);
-    if (pageNumber >= 4 && pageNumber <= totalPages) {
+    if (pageNumber >= 1 && pageNumber <= totalPages - 3) {
       currentPage = pageNumber;
       renderPage(currentPage);
     }
