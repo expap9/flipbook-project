@@ -3,19 +3,57 @@
 <head>
   <meta charset="UTF-8">
   <title>คู่มือ HAD โรงพยาบาลลำปาง ปี 2568</title>
-  <script src="https://unpkg.com/dearpdf@1.2.1/dearpdf.min.js"></script>
+  <!-- ใช้ PDF.js จาก CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+  <style>
+    #canvas-container {
+      text-align: center;
+    }
+    canvas {
+      width: 100%;
+      height: auto;
+      margin: 10px 0;
+    }
+  </style>
 </head>
 <body style="margin: 0; padding: 0;">
 
 <h1 style="text-align: center;">คู่มือ HAD โรงพยาบาลลำปาง ปี 2568</h1>
 
-<!-- ใช้ dearflip-pdf เพื่อแสดง Flipbook -->
-<dearflip-pdf 
-    id="flipbook"
-    source="url"
-    pdf-url="https://expap9.github.io/flipbook-project/had2568.pdf"
-    style="height: 90vh; width: 100%;">
-</dearflip-pdf>
+<div id="canvas-container">
+  <canvas id="pdf-canvas"></canvas>
+</div>
+
+<script>
+  // PDF.js เริ่มต้นแสดง PDF
+  const url = 'https://expap9.github.io/flipbook-project/had2568.pdf';
+
+  // การโหลดเอกสาร PDF
+  const loadingTask = pdfjsLib.getDocument(url);
+  loadingTask.promise.then(function (pdf) {
+    console.log('PDF loaded');
+    
+    // อ่านหน้าของ PDF
+    pdf.getPage(1).then(function(page) {
+      const scale = 1.5;
+      const viewport = page.getViewport({ scale: scale });
+
+      // กำหนดขนาด canvas เพื่อแสดงหน้า PDF
+      const canvas = document.getElementById('pdf-canvas');
+      const context = canvas.getContext('2d');
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
+
+      // แสดงเนื้อหาของหน้า PDF
+      page.render({
+        canvasContext: context,
+        viewport: viewport
+      });
+    });
+  }, function (error) {
+    console.error('Error: ' + error);
+  });
+</script>
 
 </body>
 </html>
