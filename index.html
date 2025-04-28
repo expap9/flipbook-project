@@ -153,6 +153,11 @@
       renderPage(currentPage);
     }
   });
+
+  // ฟังก์ชันนี้จะใช้แสดงหน้าปกก่อน
+  window.onload = function() {
+    renderPage(1); // เมื่อโหลดเสร็จแสดงหน้าปก
+  }
 </script>
 
 </body>
