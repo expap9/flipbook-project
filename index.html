@@ -8,11 +8,19 @@
   <style>
     #canvas-container {
       text-align: center;
+      margin-top: 20px;
     }
     canvas {
       width: 100%;
       height: auto;
       margin: 10px 0;
+    }
+    #controls {
+      text-align: center;
+      margin-top: 20px;
+    }
+    #page-input {
+      width: 50px;
     }
   </style>
 </head>
@@ -24,21 +32,34 @@
   <canvas id="pdf-canvas"></canvas>
 </div>
 
+<div id="controls">
+  <button id="prev-btn">ก่อนหน้า</button>
+  <input type="number" id="page-input" value="1" min="1">
+  <button id="next-btn">ถัดไป</button>
+</div>
+
 <script>
-  // PDF.js เริ่มต้นแสดง PDF
   const url = 'https://expap9.github.io/flipbook-project/had2568.pdf';
 
-  // การโหลดเอกสาร PDF
-  const loadingTask = pdfjsLib.getDocument(url);
-  loadingTask.promise.then(function (pdf) {
-    console.log('PDF loaded');
-    
-    // อ่านหน้าของ PDF
-    pdf.getPage(1).then(function(page) {
-      const scale = 1.5;
-      const viewport = page.getViewport({ scale: scale });
+  let pdfDoc = null;
+  let currentPage = 1;
+  let totalPages = 0;
+  const scale = 1.5;
 
-      // กำหนดขนาด canvas เพื่อแสดงหน้า PDF
+  // โหลดไฟล์ PDF
+  const loadingTask = pdfjsLib.getDocument(url);
+  loadingTask.promise.then(function(pdf) {
+    pdfDoc = pdf;
+    totalPages = pdf.numPages;
+    renderPage(currentPage);
+  }, function(error) {
+    console.error('Error: ' + error);
+  });
+
+  // ฟังก์ชันในการแสดงหน้า PDF
+  function renderPage(pageNum) {
+    pdfDoc.getPage(pageNum).then(function(page) {
+      const viewport = page.getViewport({ scale: scale });
       const canvas = document.getElementById('pdf-canvas');
       const context = canvas.getContext('2d');
       canvas.height = viewport.height;
@@ -49,9 +70,37 @@
         canvasContext: context,
         viewport: viewport
       });
+
+      // อัปเดตเลขหน้าบนอินพุต
+      document.getElementById('page-input').value = currentPage;
     });
-  }, function (error) {
-    console.error('Error: ' + error);
+  }
+
+  // การเปลี่ยนหน้าไปข้างหน้า
+  document.getElementById('next-btn').addEventListener('click', function() {
+    if (currentPage < totalPages) {
+      currentPage++;
+      renderPage(currentPage);
+    }
+  });
+
+  // การเปลี่ยนหน้ากลับ
+  document.getElementById('prev-btn').addEventListener('click', function() {
+    if (currentPage > 1) {
+      currentPage--;
+      renderPage(currentPage);
+    }
+  });
+
+  // การไปยังหน้าที่ผู้ใช้กรอกเลขหน้า
+  document.getElementById('page-input').addEventListener('change', function() {
+    const pageNumber = parseInt(this.value);
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      currentPage = pageNumber;
+      renderPage(currentPage);
+    } else {
+      alert('กรุณากรอกเลขหน้าที่ถูกต้อง');
+    }
   });
 </script>
 
