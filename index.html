@@ -38,7 +38,7 @@
     }
 
     #page-select {
-      width: 180px;
+      width: 300px;
       padding: 5px;
       font-size: 16px;
     }
@@ -62,6 +62,7 @@
       margin-bottom: 10px;
       font-weight: bold;
       color: #2c3e50;
+      font-size: 18px;
     }
   </style>
 </head>
@@ -70,7 +71,7 @@
 <h1 style="text-align: center; margin-top: 20px;">คู่มือ HAD โรงพยาบาลลำปาง ปี 2568</h1>
 
 <div id="pdf-container">
-  <div id="page-info" class="page-info">หน้าปก (หน้า 0)</div>
+  <div id="page-info" class="page-info">หน้าปก</div>
   <canvas id="pdf-canvas"></canvas>
 </div>
 
@@ -82,6 +83,58 @@
 
 <script>
   const url = 'https://expap9.github.io/flipbook-project/had2568.pdf';
+
+  // กำหนดชื่อหัวข้อของแต่ละหน้า
+  const pageTitles = {
+    0: "หน้าปก",
+    1: "สารบัญ",
+    2: "แนวทางในการบริหารยาในกลุ่ม High Alert Drug",
+    3: "รายการ High Alert Drug ของโรงพยาบาลลำปาง ปี 2568",
+    4: "Adrenaline injection",
+    5: "Atropine injection",
+    6: "Calcium gluconate injection",
+    7: "Cisatracurium besylat injection",
+    8: "Contrast media (สารทึบรังสี)",
+    9: "Contrast media (สารทึบรังสี)",
+    10: "Diazepam injection",
+    11: "Digoxin injection",
+    12: "Dipotassium phosphate (K2HPO4) injection",
+    13: "Fentanyl injection",
+    14: "Glipizide tablet",
+    15: "Hydroxychloroquine tablet",
+    16: "Heparin injection",
+    17: "Heparin injection",
+    18: "Magnesium sulfate injection",
+    19: "Metformin tablet",
+    20: "Methotrexate tablet",
+    21: "Midazolam injection",
+    22: "Morphine sulfate Injection",
+    23: "Norepinephrine injection",
+    24: "Pethidine injection",
+    25: "Phenytoin injection",
+    26: "Potassium Chloride injection",
+    27: "Regular Insulin injection",
+    28: "Sodium Chloride 3% (NaCl) injection",
+    29: "Warfarin tablet",
+    30: "Warfarin tablet",
+    31: "Warfarin tablet",
+    32: "Warfarin tablet",
+    33: "Warfarin tablet",
+    34: "Warfarin tablet",
+    35: "Warfarin tablet",
+    36: "Warfarin tablet",
+    37: "Warfarin tablet",
+    38: "Warfarin tablet",
+    39: "Warfarin tablet",
+    40: "Warfarin tablet",
+    41: "Warfarin tablet",
+    42: "Warfarin tablet",
+    43: "Warfarin tablet",
+    44: "Warfarin tablet",
+    45: "น้ำมันกัญชา",
+    46: "ยาเคมีบำบัด"
+    // สามารถเพิ่มหัวข้อหน้าต่อไปได้ตามต้องการ
+  };
 
   let pdfDoc = null;
   let currentPage = 0;  // 0 = หน้าปก, 1 = สารบัญ (หน้า 3 ใน PDF)
@@ -102,20 +155,17 @@
   // ฟังก์ชันในการแสดงหน้า PDF
   function renderPage(pageNum) {
     let pageToRender = pageNum;
-    let pageInfoText = "";
+    let pageTitle = pageTitles[pageNum] || `หน้า ${pageNum}`;
     
     if (pageNum === 0) {
       pageToRender = 1;  // หน้าปกจริงใน PDF (หน้า 1)
-      pageInfoText = "หน้าปก (หน้า 0)";
     } else if (pageNum === 1) {
       pageToRender = 3;  // สารบัญ (หน้า 3 ใน PDF)
-      pageInfoText = "สารบัญ (หน้า 1)";
     } else {
       pageToRender = pageNum + 2;  // เพิ่ม 2 เพื่อให้หน้า 2 ในระบบตรงกับหน้า 4 ของ PDF
-      pageInfoText = `หน้า ${pageNum} (หน้า ${pageToRender} ใน PDF)`;
     }
 
-    document.getElementById('page-info').textContent = pageInfoText;
+    document.getElementById('page-info').textContent = pageTitle;
 
     pdfDoc.getPage(pageToRender).then(function(page) {
       const viewport = page.getViewport({ scale: scale });
@@ -139,30 +189,18 @@
   function generatePageOptions() {
     const select = document.getElementById('page-select');
     
-    // เพิ่มหน้าปก
-    const coverOption = document.createElement('option');
-    coverOption.value = 0;
-    coverOption.textContent = "0 - หน้าปก (หน้า 1 ใน PDF)";
-    select.appendChild(coverOption);
-    
-    // เพิ่มสารบัญ
-    const tocOption = document.createElement('option');
-    tocOption.value = 1;
-    tocOption.textContent = "1 - สารบัญ (หน้า 3 ใน PDF)";
-    select.appendChild(tocOption);
-    
-    // เพิ่มหน้าอื่นๆ
-    for (let i = 2; i <= totalPages - 2; i++) {
+    // สร้างตัวเลือกจาก pageTitles
+    for (const [pageNum, title] of Object.entries(pageTitles)) {
       const option = document.createElement('option');
-      option.value = i;
-      option.textContent = `${i} - เนื้อหา (หน้า ${i+2} ใน PDF)`;
+      option.value = pageNum;
+      option.textContent = `${pageNum} - ${title}`;
       select.appendChild(option);
     }
   }
 
   // การเปลี่ยนหน้าไปข้างหน้า
   document.getElementById('next-btn').addEventListener('click', function() {
-    if (currentPage < totalPages - 2) {
+    if (currentPage < Object.keys(pageTitles).length - 1) {
       currentPage++;
       renderPage(currentPage);
     }
@@ -179,7 +217,7 @@
   // การไปยังหน้าที่ผู้ใช้เลือก
   document.getElementById('page-select').addEventListener('change', function() {
     const pageNumber = parseInt(this.value);
-    if (pageNumber >= 0 && pageNumber <= totalPages - 2) {
+    if (pageNumber >= 0 && pageNumber < Object.keys(pageTitles).length) {
       currentPage = pageNumber;
       renderPage(currentPage);
     }
